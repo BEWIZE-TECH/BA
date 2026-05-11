@@ -10,17 +10,16 @@ export function SystemHub() {
 
       <div className="mb-4 p-4 rounded-2xl bg-[#0f0f0f] border border-gray-800/60 shadow-sm">
         <div className="flex justify-between items-end mb-3">
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Neural Load</span>
-          <span className="text-blue-400 text-xs font-mono">54%</span>
+          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Project Load</span>
         </div>
         <div className="w-full bg-[#1a1a1a] border border-gray-800/80 h-1.5 rounded-full overflow-hidden">
-          <div className="bg-blue-600 h-full w-[54%] shadow-[0_0_10px_rgba(37,99,235,0.8)]" />
+          <div className="bg-blue-600 h-full w-[10%] shadow-[0_0_10px_rgba(37,99,235,0.8)]" />
         </div>
       </div>
 
       <div className="space-y-4 mb-10 px-1">
         <div className="flex justify-between items-center text-xs">
-          <span className="text-gray-500">Core Uptime</span>
+          <span className="text-gray-500"> Uptime</span>
           <span className="text-gray-300 font-mono">00:31:52</span>
         </div>
         <div className="flex justify-between items-center text-xs">
@@ -34,11 +33,11 @@ export function SystemHub() {
         <ul className="space-y-3">
           <li className="flex items-start gap-3">
             <span className="w-1 h-1 rounded-full bg-blue-500 mt-1.5 shadow-[0_0_5px_rgba(37,99,235,0.8)] shrink-0"></span>
-            <span className="text-xs text-gray-400 font-mono leading-relaxed">Neural sync established</span>
+            <span className="text-xs text-gray-400 font-mono leading-relaxed">Biwize AI established</span>
           </li>
           <li className="flex items-start gap-3">
             <span className="w-1 h-1 rounded-full bg-emerald-500 mt-1.5 shadow-[0_0_5px_rgba(16,185,129,0.8)] shrink-0"></span>
-            <span className="text-xs text-gray-400 font-mono leading-relaxed">DB Latency optimized</span>
+            <span className="text-xs text-gray-400 font-mono leading-relaxed">Biwize AI optimized</span>
           </li>
         </ul>
       </div>

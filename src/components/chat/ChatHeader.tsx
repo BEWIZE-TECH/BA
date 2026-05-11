@@ -1,69 +1,72 @@
-import { Moon, Sun, User, Database, ChevronLeft } from 'lucide-react';
+"use client";
+
+import { User, Database, LayoutGrid } from 'lucide-react';
 import Link from 'next/link';
 
 interface ChatHeaderProps {
-  isDarkMode: boolean;
-  toggleTheme: () => void;
   projectName: string;
 }
 
 function BiwizeLogo() {
   return (
-    <div className="relative h-11 w-11 flex items-center justify-center group/logo">
-      <div className="absolute inset-0 bg-black-500/10 rounded-full blur-xl group-hover/logo:bg-black 500/20 transition-colors duration-500" />
-      <div className="absolute inset-0 animate-[spin_8s_linear_infinite] opacity-20 group-hover/logo:opacity-40 transition-opacity">
-        <svg viewBox="0 0 100 100" className="w-full h-full stroke-blue-400 fill-none stroke-[2]">
+    <div className="relative h-8 w-8 flex items-center justify-center group/logo shrink-0">
+      <div className="absolute inset-0 bg-blue-600/10 rounded-sm blur-md group-hover/logo:bg-blue-500/20 transition-colors duration-500" />
+      <div className="absolute inset-0 opacity-80">
+        <svg viewBox="0 0 100 100" className="w-full h-full stroke-blue-500 fill-none stroke-[4]">
           <polygon points="50,5 95,25 95,75 50,95 5,75 5,25" />
         </svg>
       </div>
-      <div className="absolute h-7 w-7 border border-blue-400/50 rotate-45 animate-[spin_4s_linear_infinite_reverse] group-hover/logo:border-white transition-colors duration-500" />
-      <div className="absolute h-7 w-7 border border-blue-500/50 -rotate-12 group-hover/logo:rotate-12 transition-transform duration-700" />
-      <div className="relative h-3 w-3 bg-white rounded-[2px] shadow-[0_0_15px_rgba(255,255,255,0.8)]">
-        <div className="absolute inset-0 bg-white rounded-[1px] animate-ping opacity-50" />
+      <div className="absolute h-3.5 w-3.5 border border-blue-400/50 rotate-45 group-hover/logo:border-blue-400 transition-colors duration-500" />
+      <div className="relative h-1 w-1 bg-white rounded-sm shadow-[0_0_10px_rgba(255,255,255,1)]">
+        <div className="absolute inset-0 bg-white rounded-sm animate-ping opacity-50" />
       </div>
     </div>
   );
 }
 
-
-export function ChatHeader({ isDarkMode, toggleTheme, projectName }: ChatHeaderProps) {
+export function ChatHeader({ projectName }: ChatHeaderProps) {
   return (
-    <header className="h-20 flex items-center justify-between px-8 bg-white dark:bg-[#0a0a0a] border-b border-gray-800/80 dark:border-transparent transition-colors z-20 shrink-0 relative">
-      <div className="absolute top-0 left-0 w-32 h-20 bg-blue-900/10 blur-[50px] pointer-events-none" />
+    <header className="h-14 flex items-center justify-between px-4 md:px-6 bg-[#050505] border-b border-gray-800 transition-colors z-20 shrink-0 shadow-sm">
       
-        <Link href="/" className="flex items-center gap-4 group/brand min-w-fit">
+      {/* LEFT PORTION: Brand & Navigation */}
+      <div className="flex items-center gap-6 w-1/3">
+        <Link href="/" className="flex items-center gap-3 group/brand min-w-fit">
           <BiwizeLogo />
           <div className="flex flex-col">
-            <span className="text-xl font-black tracking-[0.3em] text-white leading-none">
+            <span className="text-[13px] font-black tracking-[0.25em] text-gray-100 leading-none">
               BIWIZE
             </span>
-            <div className="flex items-center gap-2 mt-1.5">
-              <span className="h-[2px] w-4 bg-blue-500 rounded-full" />
-              <span className="text-[8px] uppercase tracking-[0.4em] text-slate-500 font-bold group-hover/brand:text-blue-400 transition-colors">
-                Intelligence Layer
-              </span>
-            </div>
+            <span className="text-[8px] uppercase tracking-[0.3em] text-blue-500 font-bold mt-1">
+              Analysis Core
+            </span>
           </div>
         </Link>
-
-      <div className="bg-[#141414]  flex items-center gap-3 z-50">
         
-        <span className="text-sm font-medium text-gray-300 truncate max-w-sm">{projectName}</span>
+        <div className="hidden md:flex items-center h-5 border-l border-gray-800 pl-6">
+           <Link href="/dashboard" className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-500 hover:text-blue-500 transition-colors">
+              <LayoutGrid size={12} />
+              Workspace
+           </Link>
+        </div>
+      </div>
+
+      {/* CENTER PORTION: Active Project Context */}
+      <div className="flex items-center justify-center w-1/3">
+         <div className="flex items-center gap-2 px-3 py-1.5 bg-[#111] border border-gray-800 rounded-md shadow-inner">
+            <Database size={12} className="text-blue-500" />
+            <span className="text-[11px] font-mono text-gray-300 truncate max-w-[250px]" title={projectName}>
+              {projectName || "Initializing Context..."}
+            </span>
+         </div>
       </div>
       
-      <div className="flex items-center gap-4 z-10">
+      {/* RIGHT PORTION: System Controls */}
+      <div className="flex items-center justify-end gap-2.5 w-1/3">
         <button 
-          onClick={toggleTheme}
-          className="w-10 h-10 rounded-full bg-gray-100 dark:bg-[#161616] flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors group"
+          className="w-8 h-8 rounded-md bg-blue-600/10 border border-blue-500/30 flex items-center justify-center text-blue-400 hover:bg-blue-600/20 transition-all"
+          title="User Profile & Settings"
         >
-          {isDarkMode ? (
-            <Sun size={18} className="group-hover:scale-110 transition-transform text-yellow-500" />
-          ) : (
-            <Moon size={18} className="group-hover:scale-110 transition-transform" />
-          )}
-        </button>
-        <button className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-600/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
-          <User size={18} />
+          <User size={14} />
         </button>
       </div>
     </header>

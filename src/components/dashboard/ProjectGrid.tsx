@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -13,7 +12,13 @@ interface Project {
   created_at: string;
 }
 
-export function ProjectGrid() {
+// --- NEW: Added Props Interface ---
+interface ProjectGridProps {
+  searchQuery?: string;
+}
+
+// --- NEW: Accept the searchQuery prop with a default empty string ---
+export function ProjectGrid({ searchQuery = '' }: ProjectGridProps) {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,14 +111,20 @@ export function ProjectGrid() {
     setDeletingId(null);
   };
 
+  // --- NEW: Filter the projects based on the search query ---
+  const filteredProjects = projects.filter(project => 
+    project.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (loading) {
     return <div className="p-6 text-gray-500 animate-pulse font-mono text-sm">Scanning neural nodes...</div>;
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-      {projects.length > 0 ? (
-        projects.map((project) => (
+      {/* --- NEW: Map over filteredProjects instead of the full projects array --- */}
+      {filteredProjects.length > 0 ? (
+        filteredProjects.map((project) => (
           <div 
             key={project.id} 
             onClick={() => handleCardClick(project.id)}
@@ -142,7 +153,7 @@ export function ProjectGrid() {
             
             : deletingId === project.id ? (
               <div className="flex flex-col h-full justify-between items-center text-center" onClick={e => e.stopPropagation()}>
-                <span className="text-xs text-red-400 font-bold uppercase tracking-widest mt-1">Purge Node?</span>
+                <span className="text-xs text-red-400 font-bold uppercase tracking-widest mt-1">Are You sure ?</span>
                 <div className="flex justify-center gap-3 w-full">
                   <button onClick={cancelAction} disabled={isProcessing} className="flex-1 py-1.5 text-xs font-medium text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-colors border border-gray-700">
                     Cancel
@@ -192,7 +203,10 @@ export function ProjectGrid() {
           <div className="w-12 h-12 border border-gray-700 rounded-xl mb-4 flex items-center justify-center text-gray-600 rotate-45">
              <div className="w-4 h-4 bg-gray-700 shadow-[0_0_10px_rgba(255,255,255,0.1)]"></div>
           </div>
-          <p className="text-gray-500 text-sm tracking-widest font-mono uppercase">No active nodes detected</p>
+          {/* --- NEW: Dynamic empty state depending on if the user is searching or not --- */}
+          <p className="text-gray-500 text-sm tracking-widest font-mono uppercase">
+            {searchQuery ? `No matches found for "${searchQuery}"` : 'No active Project detected'}
+          </p>
         </div>
       )}
     </div>

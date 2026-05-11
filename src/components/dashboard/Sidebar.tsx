@@ -23,8 +23,6 @@ function BiwizeLogo() {
 }
 const navItems = [
   { name: 'Workspaces', icon: LayoutGrid, href: '/dashboard', active: true }, 
-  { name: 'Analytics', icon: Activity, href: '/dashboard/analytics', active: false },
-  { name: 'Neural Engine', icon: Cpu, href: '/dashboard/engine', active: false },
   { name: 'Settings', icon: Settings, href: '/Settings', active: false },
 ];
 
@@ -58,10 +56,13 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <button className="flex items-center gap-4 px-4 py-3 text-gray-600 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all mt-auto group">
+      <Link
+        href="/auth"
+        className="flex items-center gap-4 px-4 py-3 text-gray-600 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all mt-auto group"
+      >
         <Power size={18} className="group-hover:drop-shadow-[0_0_8px_rgba(248,113,113,0.8)] transition-all" />
         <span className="text-sm font-medium">Disconnect</span>
-      </button>
+      </Link>
     </aside>
   );
 }

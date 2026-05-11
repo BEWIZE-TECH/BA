@@ -1,55 +1,89 @@
 'use client';
+
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Search, Moon, Sun, User } from 'lucide-react';
+import { Search, User, Settings, LogOut } from 'lucide-react';
 
 interface TopHeaderProps {
-    isDarkMode: boolean;
-    toggleTheme: () => void;
+  isDarkMode: boolean;
+  toggleTheme: () => void;
+  // --- NEW PROPS ADDED ---
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
-export function TopHeader({ isDarkMode, toggleTheme }: TopHeaderProps) {
-    const router = useRouter();
-    const [searchQuery, setSearchQuery] = useState('');
+export function TopHeader({ isDarkMode, toggleTheme, searchQuery, onSearchChange }: TopHeaderProps) {
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (searchQuery.trim()) console.log(`Searching for "${searchQuery}"...`);
-    };
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      console.log(`Searching Knowledge Base for: "${searchQuery}"...`);
+    }
+  };
 
-    return (
-        <header className="w-380 h-16 flex items-center justify-between px-8 bg-white dark:bg-[#141414] border-l border-gray-800/50 dark:border-transparent transition-colors">
-          
-            <form onSubmit={handleSearch} className="relative w-48 transition-all">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600" size={18} />
-                <input 
-                    type="text" 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search neural nodes..." 
-                    className="w-full bg-gray-100 dark:bg-[#161616] border border-gray-200 dark:border-gray-800 text-sm text-gray-800 dark:text-gray-300 rounded-full pl-10 pr-4 py-2.5 focus:outline-none focus:border-blue-500/50 transition-colors"
-                />
-            </form>
-            
-            <div className="flex items-center gap-4">
-                <button 
-                    onClick={toggleTheme}
-                    className="w-10 h-10 rounded-full bg-gray-100 dark:bg-[#161616] border border-gray-200 dark:border-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors group"
-                >
-                    {isDarkMode ? (
-                        <Sun size={18} className="group-hover:scale-110 transition-transform text-yellow-500" />
-                    ) : (
-                        <Moon size={18} className="group-hover:scale-110 transition-transform" />
-                    )}
-                </button>
+  const navigateTo = (path: string) => {
+    console.log(`Navigating to: ${path}`);
+  };
 
-                <button 
-                    onClick={() => router.push('/dashboard/settings')}
-                    className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-600/20 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-600/40 transition-colors group"
-                >
-                    <User size={18} className="group-hover:scale-110 transition-transform" />
-                </button>
+  return (
+    <header className="sticky top-0 z-40 w-full h-16 flex items-center justify-between px-6 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5 transition-all">
+      
+      {/* Search Section */}
+      <div className="flex-1 max-w-md">
+        <form onSubmit={handleSearch} className="relative group">
+          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
+            <Search size={18} />
+          </div>
+          <input
+            type="text"
+            placeholder="Search documentation or requirements..."
+            // --- UPDATED TO USE PROPS ---
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full h-10 pl-10 pr-12 bg-gray-100 dark:bg-white/5 border border-transparent focus:border-blue-500/50 dark:focus:border-blue-400/30 rounded-lg text-sm transition-all outline-none text-gray-700 dark:text-gray-200 placeholder:text-gray-500"
+          />
+        </form>
+      </div>
+
+      {/* Action Items */}
+      <div className="flex items-center gap-3">
+        <div className="w-px h-6 bg-gray-200 dark:bg-white/10 mx-1" />
+
+        {/* User Profile Dropdown */}
+        <div className="relative">
+          <button 
+            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+            className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full border border-transparent hover:border-gray-200 dark:hover:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 transition-all group"
+          >
+            <div className="hidden md:flex flex-col items-end text-[11px] leading-tight mr-1">
+              <span className="font-semibold text-gray-900 dark:text-white">Business Analyst</span>
+              <span className="text-gray-500 dark:text-gray-400">BIWIZE </span>
             </div>
-        </header>
-    );
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform ring-2 ring-transparent group-hover:ring-blue-500/20">
+              <User size={18} />
+            </div>
+          </button>
+
+          {isUserMenuOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#141414] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl py-2 overflow-hidden animate-in fade-in slide-in-from-top-1">
+              <button 
+                onClick={() => { navigateTo('/settings'); setIsUserMenuOpen(false); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+              >
+                <Settings size={16} />
+                <span>Settings</span>
+              </button>
+              <button 
+                onClick={() => { console.log('Logging out...'); setIsUserMenuOpen(false); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-t border-gray-100 dark:border-white/5"
+              >
+                <LogOut size={16} />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
 }

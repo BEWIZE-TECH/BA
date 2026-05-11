@@ -4,14 +4,15 @@
 import { useEffect, useRef } from 'react';
 import { Message, ChatMessage } from './ChatMessage';
 
+
 interface ChatWindowProps {
   messages: Message[];
-  onLogFeedback: (messageId: string, type: 'up' | 'down', toolType: string) => void;
+  onLogFeedback: (messageId: string, type: 'up' | 'down', reason?: string) => void;
 }
 
 export function ChatWindow({ messages, onLogFeedback }: ChatWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
+  const N8N_UPLOAD_WEBHOOK = process.env.NEXT_PUBLIC_N8N_LOG_FEEDBACK_WEBHOOK;
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };

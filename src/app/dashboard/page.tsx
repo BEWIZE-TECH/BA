@@ -13,6 +13,9 @@ export default function Dashboard() {
   const [userIdentifier, setUserIdentifier] = useState<string>('Authenticating...');
   const [totalNodes, setTotalNodes] = useState<number>(0);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  
+  // --- NEW: Master Search State ---
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     async function fetchDashboardState() {
@@ -43,7 +46,13 @@ export default function Dashboard() {
         <Sidebar />
         
         <div className="flex-1 flex flex-col relative">
-          <TopHeader isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} />
+          <TopHeader 
+            isDarkMode={isDarkMode} 
+            toggleTheme={() => setIsDarkMode(!isDarkMode)} 
+            // --- NEW: Pass state to TopHeader ---
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
           
           <div className="flex-1 flex overflow-hidden">
             <main className="flex-1 overflow-y-auto px-8 pb-8">
@@ -81,10 +90,13 @@ export default function Dashboard() {
               </div>
 
               <div className="flex justify-between items-center mb-4 px-2">
-                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 tracking-wide">Active Projects</h2>
+                <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 tracking-wide">
+                  {searchQuery ? 'Search Results' : 'Active Projects'}
+                </h2>
               </div>
 
-              <ProjectGrid />
+              {/* --- NEW: Pass searchQuery to ProjectGrid --- */}
+              <ProjectGrid searchQuery={searchQuery} />
             </main>
 
             <SystemHub />

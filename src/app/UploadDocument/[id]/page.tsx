@@ -3,7 +3,9 @@
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Plus, FileText, ArrowRight, Loader2, X, Database, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Upload, FileText, ArrowRight, Loader2, X, Database, CheckCircle2, AlertTriangle, ArrowLeft } from 'lucide-react';
+import BiwizeLogo from '@/components/General/logo';
+import { supabase } from '@/lib/supabase';
 
 interface FileData {
   file: File;
@@ -12,6 +14,9 @@ interface FileData {
 }
 
 export default function NewChatPage() {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [projectName, setProjectName] = useState('');
+  
   const [files, setFiles] = useState<FileData[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState<'idle' | 'uploading' | 'embedding'>('idle');
@@ -74,16 +79,38 @@ export default function NewChatPage() {
   };
 
   const startAnalysis = async () => {
-    if (files.length === 0) return;
+    if (files.length === 0 || !projectName.trim()) return;
     setIsProcessing(true);
     setStatus('uploading');
 
     try {
+      // 1. Create project in Supabase Database
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const projectPayload = user 
+        ? { name: projectName, user_id: user.id } 
+        : { name: projectName }; // Fallback if no auth is active, depends on your RLS policies
+
+      const { data: projectData, error: dbError } = await supabase
+        .from('projects')
+        .insert([projectPayload])
+        .select()
+        .single();
+
+      if (dbError || !projectData) {
+        throw new Error(`Database Error: ${dbError?.message || "Failed to create project"}`);
+      }
+
+      const projectId = projectData.id;
+
+      // 2. Prepare and send files to n8n Webhook
       const formData = new FormData();
       files.forEach((fileData) => {
         formData.append('data', fileData.file); 
       });
 
+      formData.append('projectName', projectName);
+      formData.append('projectId', projectId); // Send Supabase ID to n8n for vector linking
       formData.append('action', 'ingest_artifacts');
       formData.append('sessionId', 'Sentinel_WS_01');
       formData.append('timestamp', new Date().toISOString());
@@ -93,16 +120,16 @@ export default function NewChatPage() {
         body: formData,
       });
 
-      if (!response.ok) throw new Error("n8n Ingestion Failed");
+      if (!response.ok) throw new Error("n8n Ingestion Pipeline Failed");
 
       setStatus('embedding');
       
-      const newWorkspaceId = "node-" + Math.random().toString(36).substring(2, 11);
-      router.push(`/chat/${newWorkspaceId}`);
+      // 3. Route to the chat interface using the DB generated project ID
+      router.push(`/chat/${projectId}`);
 
     } catch (error) {
       console.error("Upload Error:", error);
-      alert("Neural Link Failure: n8n ingestion pipeline unreachable.");
+      alert(error instanceof Error ? error.message : "Neural Link Failure: Pipeline unreachable.");
     } finally {
       setIsProcessing(false);
       setStatus('idle');
@@ -114,137 +141,205 @@ export default function NewChatPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
       
       <header className="mb-12 text-center relative z-10 pt-8">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#161616] border border-gray-800 mb-6 shadow-lg">
-          <Database className="text-blue-500 shadow-blue-500/50" size={20} />
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#161616] border border-gray-800 mb-6 shadow-lg text-blue-500 shadow-blue-500/50">
+          <BiwizeLogo />
         </div>
         <h1 className="text-3xl md:text-4xl tracking-[0.3em] font-light uppercase text-gray-200">
-          Node <span className="text-blue-500 font-semibold">Ingestion</span>
+          {step === 1 ? (
+            <>New <span className="text-blue-500 font-semibold">Project</span></>
+          ) : (
+            <>Upload <span className="text-blue-500 font-semibold">Files</span></>
+          )}
         </h1>
-        <p className="text-gray-500 text-xs mt-3 font-mono tracking-widest uppercase">Provide context artifacts for the neural engine</p>
+        <p className="text-gray-500 text-xs mt-3 font-mono tracking-widest uppercase">
+          {step === 1 ? 'Initialize Workspace Parameters' : `Target Project: ${projectName}`}
+        </p>
       </header>
 
-      <main className="relative z-10 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-7 h-full flex flex-col">
-          <input 
-            type="file" 
-            multiple 
-            ref={fileInputRef} 
-            accept=".pdf,.json,.csv,.txt"
-            className="hidden" 
-            onChange={(e) => handleFiles(Array.from(e.target.files || []))} 
-          />
-          <div 
-            onClick={onDropzoneClick}
-            onDragOver={handleDragOver} 
-            onDragLeave={handleDragLeave}
-            onDrop={handleFileDrop}
-            className={`flex-1 flex flex-col items-center justify-center min-h-[400px] border-2 border-dashed rounded-[2rem] p-12 text-center transition-all duration-300 cursor-pointer ${
-              isDragging 
-                ? 'border-blue-500 bg-blue-500/5 shadow-[0_0_30px_rgba(37,99,235,0.15)] scale-[1.02]' 
-                : 'border-gray-800 bg-[#141414] hover:border-gray-600 hover:bg-[#1a1a1a]'
-            }`}
-          >
-            <motion.div 
-              animate={{ y: isDragging ? -10 : 0 }}
+      <main className="relative z-10 max-w-6xl mx-auto">
+        <AnimatePresence mode="wait">
+          {step === 1 && (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="w-20 h-20 bg-[#0f0f0f] border border-gray-800 rounded-2xl flex items-center justify-center mb-6 shadow-xl"
+              className="max-w-md mx-auto flex flex-col bg-[#141414] border border-gray-800/80 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden"
             >
-              <Upload className={`transition-colors duration-300 ${isDragging ? 'text-blue-400' : 'text-gray-500'}`} size={32} />
-            </motion.div>
-            <p className="text-xl font-light text-gray-300 mb-2">
-              Drop artifacts here or <span className="text-blue-400 font-medium hover:text-blue-300 transition-colors">browse</span>
-            </p>
-            <p className="text-xs font-mono text-gray-600 uppercase tracking-wider">
-              Supported structures: PDF, TXT, CSV, JSON
-            </p>
-          </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[50px] pointer-events-none" />
+              
+              <h2 className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 mb-6 flex items-center gap-2">
+                <Database size={14} /> Project Details
+              </h2>
 
-          <AnimatePresence>
-            {uploadError && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="mt-4 p-4 border border-red-500/30 bg-red-500/10 rounded-xl flex items-start gap-3"
-              >
-                <AlertTriangle size={18} className="text-red-400 shrink-0 mt-0.5" />
-                <p className="text-xs font-mono text-red-300 leading-relaxed">{uploadError}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className="lg:col-span-5 flex flex-col bg-[#141414] border border-gray-800/80 rounded-[2rem] p-8 h-[400px] shadow-2xl relative overflow-hidden">
-          
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[50px] pointer-events-none" />
-
-          <div className="flex items-center justify-between mb-6 z-10 shrink-0">
-            <h2 className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 flex items-center gap-2">
-              <FileText size={14} /> Artifact Queue
-            </h2>
-            <span className="text-xs font-mono text-gray-500 bg-[#0f0f0f] px-2 py-1 rounded-md border border-gray-800">
-              {files.length} Nodes
-            </span>
-          </div>
-     
-          <div className="flex-1 overflow-y-auto max-h-[200px] mb-6 pr-2 space-y-3 z-10 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-800 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-700 transition-colors">
-            <AnimatePresence>
-              {files.map((fileData, i) => (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  key={`${fileData.name}-${i}`} 
-                  className="flex items-center p-3 border border-gray-800/60 rounded-xl bg-[#0f0f0f] group hover:border-gray-700 transition-colors"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-[#1a1a1a] flex items-center justify-center mr-3 border border-gray-800 shrink-0">
-                     <CheckCircle2 size={14} className="text-emerald-500/70" />
-                  </div>
-                  <div className="flex flex-col flex-1 min-w-0">
-                    <span className="text-sm font-medium text-gray-300 truncate pr-4">{fileData.name}</span>
-                    <span className="text-[10px] text-gray-600 font-mono">{fileData.size}</span>
-                  </div>
-                  <button 
-                    onClick={() => setFiles(files.filter((_, idx) => idx !== i))}
-                    className="p-2 bg-transparent hover:bg-red-500/10 rounded-lg transition-colors group-hover:opacity-100 opacity-50 shrink-0"
-                  >
-                    <X size={14} className="text-gray-500 hover:text-red-400 transition-colors" />
-                  </button>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            
-            {files.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-8">
-                <div className="w-10 h-10 border border-gray-700 rounded-xl mb-3 flex items-center justify-center rotate-45">
-                   <div className="w-3 h-3 bg-gray-700"></div>
-                </div>
-                <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500">Queue is empty</p>
+              <div className="mb-8 z-10">
+                <label className="block text-xs font-mono text-gray-400 uppercase tracking-widest mb-3">
+                  Project Name
+                </label>
+                <input
+                  type="text"
+                  autoFocus
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  placeholder="e.g. Project Apollo"
+                  onKeyDown={(e) => { if (e.key === 'Enter' && projectName.trim()) setStep(2); }}
+                  className="w-full bg-[#0f0f0f] border border-gray-800 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-mono text-sm placeholder:text-gray-700"
+                />
               </div>
-            )}
-          </div>
 
-          <button 
-            disabled={files.length === 0 || isProcessing} 
-            onClick={startAnalysis}
-            className={`relative w-full py-4 rounded-xl flex items-center justify-center gap-3 transition-all duration-300 uppercase tracking-widest text-[10px] font-bold z-10 overflow-hidden shrink-0 ${
-              files.length > 0 
-                ? 'bg-blue-600 text-white hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.4)] cursor-pointer' 
-                : 'bg-[#0f0f0f] text-gray-600 border border-gray-800 cursor-not-allowed'
-            }`}
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="animate-spin text-blue-200" size={16} />
-                {status === 'uploading' ? 'Ingesting Artifacts...' : 'Syncing Vector DB...'}
-              </>
-            ) : (
-              <>
-                Initialize Link <ArrowRight size={16} />
-              </>
-            )}
-          </button>
-        </div>
+              <button
+                onClick={() => setStep(2)}
+                disabled={!projectName.trim()}
+                className="relative w-full py-4 rounded-xl flex items-center justify-center gap-3 transition-all duration-300 uppercase tracking-widest text-[10px] font-bold z-10 overflow-hidden bg-blue-600 text-white hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+              >
+                Proceed to Upload <ArrowRight size={16} />
+              </button>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+            >
+              <div className="lg:col-span-7 h-full flex flex-col">
+                <div className="mb-4">
+                  <button 
+                    onClick={() => setStep(1)}
+                    className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-mono text-gray-500 hover:text-blue-400 transition-colors"
+                  >
+                    <ArrowLeft size={14} /> Edit Project Name
+                  </button>
+                </div>
+
+                <input 
+                  type="file" 
+                  multiple 
+                  ref={fileInputRef} 
+                  accept=".pdf,.json,.csv,.txt"
+                  className="hidden" 
+                  onChange={(e) => handleFiles(Array.from(e.target.files || []))} 
+                />
+                <div 
+                  onClick={onDropzoneClick}
+                  onDragOver={handleDragOver} 
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleFileDrop}
+                  className={`flex-1 flex flex-col items-center justify-center min-h-[400px] border-2 border-dashed rounded-[2rem] p-12 text-center transition-all duration-300 cursor-pointer ${
+                    isDragging 
+                      ? 'border-blue-500 bg-blue-500/5 shadow-[0_0_30px_rgba(37,99,235,0.15)] scale-[1.02]' 
+                      : 'border-gray-800 bg-[#141414] hover:border-gray-600 hover:bg-[#1a1a1a]'
+                  }`}
+                >
+                  <motion.div 
+                    animate={{ y: isDragging ? -10 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-20 h-20 bg-[#0f0f0f] border border-gray-800 rounded-2xl flex items-center justify-center mb-6 shadow-xl"
+                  >
+                    <Upload className={`transition-colors duration-300 ${isDragging ? 'text-blue-400' : 'text-gray-500'}`} size={32} />
+                  </motion.div>
+                  <p className="text-xl font-light text-gray-300 mb-2">
+                    Drop Documents here or <span className="text-blue-400 font-medium hover:text-blue-300 transition-colors">browse</span>
+                  </p>
+                  <p className="text-xs font-mono text-gray-600 uppercase tracking-wider">
+                    Supported structures: PDF, TXT, CSV, JSON
+                  </p>
+                </div>
+
+                <AnimatePresence>
+                  {uploadError && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="mt-4 p-4 border border-red-500/30 bg-red-500/10 rounded-xl flex items-start gap-3"
+                    >
+                      <AlertTriangle size={18} className="text-red-400 shrink-0 mt-0.5" />
+                      <p className="text-xs font-mono text-red-300 leading-relaxed">{uploadError}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="lg:col-span-5 flex flex-col bg-[#141414] border border-gray-800/80 rounded-[2rem] p-8 h-[400px] shadow-2xl relative overflow-hidden lg:mt-[34px]">
+                
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[50px] pointer-events-none" />
+
+                <div className="flex items-center justify-between mb-6 z-10 shrink-0">
+                  <h2 className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 flex items-center gap-2">
+                    <FileText size={14} /> File Queue
+                  </h2>
+                  <span className="text-xs font-mono text-gray-500 bg-[#0f0f0f] px-2 py-1 rounded-md border border-gray-800">
+                    {files.length} Files
+                  </span>
+                </div>
+          
+                <div className="flex-1 overflow-y-auto max-h-[200px] mb-6 pr-2 space-y-3 z-10 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-800 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-700 transition-colors">
+                  <AnimatePresence>
+                    {files.map((fileData, i) => (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        key={`${fileData.name}-${i}`} 
+                        className="flex items-center p-3 border border-gray-800/60 rounded-xl bg-[#0f0f0f] group hover:border-gray-700 transition-colors"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-[#1a1a1a] flex items-center justify-center mr-3 border border-gray-800 shrink-0">
+                          <CheckCircle2 size={14} className="text-emerald-500/70" />
+                        </div>
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <span className="text-sm font-medium text-gray-300 truncate pr-4">{fileData.name}</span>
+                          <span className="text-[10px] text-gray-600 font-mono">{fileData.size}</span>
+                        </div>
+                        <button 
+                          onClick={() => setFiles(files.filter((_, idx) => idx !== i))}
+                          className="p-2 bg-transparent hover:bg-red-500/10 rounded-lg transition-colors group-hover:opacity-100 opacity-50 shrink-0"
+                        >
+                          <X size={14} className="text-gray-500 hover:text-red-400 transition-colors" />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  
+                  {files.length === 0 && (
+                    <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-8">
+                      <div className="w-10 h-10 border border-gray-700 rounded-xl mb-3 flex items-center justify-center rotate-45">
+                        <div className="w-3 h-3 bg-gray-700"></div>
+                      </div>
+                      <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500">Queue is empty</p>
+                    </div>
+                  )}
+                </div>
+
+                <button 
+                  disabled={files.length === 0 || isProcessing} 
+                  onClick={startAnalysis}
+                  className={`relative w-full py-4 rounded-xl flex items-center justify-center gap-3 transition-all duration-300 uppercase tracking-widest text-[10px] font-bold z-10 overflow-hidden shrink-0 ${
+                    files.length > 0 
+                      ? 'bg-blue-600 text-white hover:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.4)] cursor-pointer' 
+                      : 'bg-[#0f0f0f] text-gray-600 border border-gray-800 cursor-not-allowed'
+                  }`}
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="animate-spin text-blue-200" size={16} />
+                      {status === 'uploading' ? 'Uploading Files...' : 'Syncing Vector DB...'}
+                    </>
+                  ) : (
+                    <>
+                      Submit <ArrowRight size={16} />
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
