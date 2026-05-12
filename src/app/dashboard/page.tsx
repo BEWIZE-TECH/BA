@@ -61,7 +61,7 @@ export default function Dashboard() {
                 
                 <div className="z-10">
                   <h1 className="text-4xl font-light text-gray-800 dark:text-gray-300">
-                    System <span className="text-blue-600 dark:text-blue-500 font-semibold shadow-blue-500/50 drop-shadow-lg">Initialized.</span>
+                    BIWIZE <span className="text-blue-600 dark:text-blue-500 font-semibold shadow-blue-500/50 drop-shadow-lg">AI.</span>
                   </h1>
                   <p className="text-gray-500 text-xs mt-3 font-mono tracking-wider">
                     Status: <span className={userIdentifier.includes('Offline') ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}>
@@ -73,18 +73,10 @@ export default function Dashboard() {
                 <div className="flex gap-6 z-10">
                   <div className="bg-gray-50 dark:bg-[#0f0f0f] border border-gray-200 dark:border-gray-800 rounded-2xl px-6 py-4 flex flex-col items-center transition-colors">
                     <span className="text-[10px] text-gray-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                      Total Nodes
+                      Total Projects
                       <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_4px_rgba(16,185,129,0.8)]"></span>
                     </span>
                     <span className="text-2xl font-semibold text-gray-800 dark:text-gray-200">{totalNodes}</span>
-                  </div>
-                  
-                  <div className="bg-gray-50 dark:bg-[#0f0f0f] border border-gray-200 dark:border-gray-800 rounded-2xl px-6 py-4 flex flex-col items-center transition-colors">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                      Latency
-                      <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_4px_rgba(16,185,129,0.8)]"></span>
-                    </span>
-                    <span className="text-2xl font-semibold text-gray-800 dark:text-gray-200">0.4ms</span>
                   </div>
                 </div>
               </div>

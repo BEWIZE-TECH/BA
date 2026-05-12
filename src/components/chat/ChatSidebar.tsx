@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Clock, 
   Hash, 
@@ -14,7 +15,10 @@ import {
   LayoutDashboard,
   Power,
   Hexagon,
-  ChevronRight
+  ChevronRight,
+  Trash2,
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -39,6 +43,10 @@ export function ChatSidebar() {
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(true);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+
+  // Custom Delete Modal State
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchRecentProjects = async () => {
@@ -89,11 +97,45 @@ export function ChatSidebar() {
     setIsDisconnecting(true);
     try {
       await supabase.auth.signOut();
-
       router.push('/auth');
     } catch (error) {
       console.error("Error signing out:", error);
       setIsDisconnecting(false);
+    }
+  };
+
+  const initiateDelete = (e: React.MouseEvent, project: Project) => {
+    e.preventDefault(); 
+    e.stopPropagation();
+    setProjectToDelete(project);
+  };
+
+  const confirmDelete = async () => {
+    if (!projectToDelete) return;
+    setIsDeleting(true);
+
+    try {
+      // 1. Delete from database
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', projectToDelete.id);
+
+      if (error) throw error;
+
+      // 2. Remove from local state immediately
+      setProjects(prevProjects => prevProjects.filter(p => p.id !== projectToDelete.id));
+
+      // 3. If they deleted the chat they are currently looking at, redirect
+      if (currentSessionId === projectToDelete.id) {
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error("Failed to delete project:", error);
+      alert("Failed to delete project. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setProjectToDelete(null);
     }
   };
 
@@ -108,19 +150,26 @@ export function ChatSidebar() {
           {list.map((project) => {
             const isActive = currentSessionId === project.id;
             return (
-              <li key={project.id}>
-                <Link href={`/chat/${project.id}`} className="block focus:outline-none">
-                  <button 
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all duration-300 group relative overflow-hidden ${
-                      isActive 
-                        ? 'bg-gradient-to-r from-blue-600/20 to-transparent border-l-2 border-blue-500 text-blue-300 shadow-[inset_10px_0_20px_rgba(59,130,246,0.05)]' 
-                        : 'text-gray-400 hover:bg-white/5 hover:text-gray-200 hover:translate-x-1 border-l-2 border-transparent'
-                    }`}
-                  >
-                    <span className="truncate font-medium relative z-10 text-[13px]">{project.name}</span>
-                    {isActive && <ChevronRight size={14} className="text-blue-500 opacity-50 relative z-10" />}
-                  </button>
+              <li key={project.id} className="relative group">
+                <Link 
+                  href={`/chat/${project.id}`} 
+                  className={`block w-full flex items-center justify-between pl-3 pr-8 py-2.5 rounded-xl text-sm transition-all duration-300 overflow-hidden ${
+                    isActive 
+                      ? 'bg-gradient-to-r from-blue-600/20 to-transparent border-l-2 border-blue-500 text-blue-300 shadow-[inset_10px_0_20px_rgba(59,130,246,0.05)]' 
+                      : 'text-gray-400 hover:bg-white/5 hover:text-gray-200 hover:translate-x-1 border-l-2 border-transparent'
+                  }`}
+                >
+                  <span className="truncate font-medium relative z-10 text-[13px]">{project.name}</span>
+                  {isActive && <ChevronRight size={14} className="text-blue-500 opacity-50 relative z-10" />}
                 </Link>
+                
+                <button
+                  onClick={(e) => initiateDelete(e, project)}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all z-20"
+                  title="Delete Project"
+                >
+                  <Trash2 size={14} />
+                </button>
               </li>
             );
           })}
@@ -131,6 +180,62 @@ export function ChatSidebar() {
 
   return (
     <>
+      {/* Custom Delete Confirmation Modal */}
+      <AnimatePresence>
+        {projectToDelete && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="bg-[#111111] border border-white/10 rounded-3xl p-6 w-full max-w-sm shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative overflow-hidden"
+            >
+              {/* Decorative Red Glow */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50" />
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-500/10 blur-3xl rounded-full pointer-events-none" />
+
+              <div className="flex flex-col gap-4 relative z-10">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 shrink-0">
+                    <AlertTriangle size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Delete Project?</h3>
+                    <p className="text-xs text-gray-400 truncate max-w-[200px]">{projectToDelete.name}</p>
+                  </div>
+                </div>
+
+                <p className="text-[13px] text-gray-400 leading-relaxed bg-white/5 p-3 rounded-xl border border-white/5">
+                  This action is <strong className="text-red-400 font-semibold">permanent</strong>. All generated requirements, chat history, and embedded artifacts associated with this session will be wiped from the system.
+                </p>
+
+                <div className="flex items-center gap-3 mt-2">
+                  <button 
+                    onClick={() => setProjectToDelete(null)}
+                    disabled={isDeleting}
+                    className="flex-1 px-4 py-2.5 rounded-xl text-[13px] font-semibold text-gray-300 bg-white/5 hover:bg-white/10 border border-white/5 transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={confirmDelete}
+                    disabled={isDeleting}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-bold text-white bg-red-600 hover:bg-red-500 border border-red-500/50 shadow-[0_0_15px_rgba(220,38,38,0.3)] transition-all disabled:opacity-50"
+                  >
+                    {isDeleting ? <Loader2 size={16} className="animate-spin" /> : 'Confirm Delete'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {!isOpen && (
         <button 
           onClick={() => setIsOpen(true)}

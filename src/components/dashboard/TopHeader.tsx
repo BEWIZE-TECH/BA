@@ -67,19 +67,19 @@ export function TopHeader({ isDarkMode, toggleTheme, searchQuery, onSearchChange
           {isUserMenuOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#141414] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl py-2 overflow-hidden animate-in fade-in slide-in-from-top-1">
               <button 
-                onClick={() => { navigateTo('/settings'); setIsUserMenuOpen(false); }}
+                onClick={() => { navigateTo('/Settings'); setIsUserMenuOpen(false); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
               >
                 <Settings size={16} />
                 <span>Settings</span>
               </button>
-              <button 
-                onClick={() => { console.log('Logging out...'); setIsUserMenuOpen(false); }}
+                <button 
+                onClick={() => { navigateTo('/auth'); setIsUserMenuOpen(false); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors border-t border-gray-100 dark:border-white/5"
-              >
+                >
                 <LogOut size={16} />
                 <span>Sign Out</span>
-              </button>
+                </button>
             </div>
           )}
         </div>

@@ -5,13 +5,13 @@ import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UploadCloud, Loader2, FileText, Sparkles, Layout } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { toBase64 } from '@/lib/chatHelpers';
 
 // Modular Components
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { ChatMessage, Message } from '@/components/chat/ChatMessage';
 import { ArtifactPanel } from '@/components/chat/panel';
+import BiwizeLogo from '@/components/General/logo';
 
 export default function InteractiveChat() {
   const params = useParams();
@@ -49,7 +49,7 @@ export default function InteractiveChat() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isArtifactEditing, artifactDraft]);
 
-  // --- FETCH HISTORY UPDATED TO LOAD ATTACHMENTS ---
+  // --- FETCH HISTORY WITH LANGCHAIN AGENT FILTER ---
   useEffect(() => {
     const fetchHistory = async () => {
       if (!sessionId) return;
@@ -62,25 +62,82 @@ export default function InteractiveChat() {
         if (error) throw error;
 
         if (data && data.length > 0) {
-          const historicalMessages: Message[] = data.map((row: any) => {
-            const msgData = row.message;
-            const isUser = msgData.type === 'human' || msgData.role === 'user';
-            let type: 'text' | 'document' | 'image' | 'mermaid' | 'markdown' = 'text';
-            if (msgData.kwargs?.is_artifact) type = 'document';
-            else if (msgData.kwargs?.image_url) type = 'image';
-            else if (msgData.kwargs?.mermaid_code) type = 'mermaid';
+          const historicalMessages: Message[] = data
+            // 1. FILTER OUT N8N/LANGCHAIN INTERNAL TOOL STEPS
+            .filter((row: any) => {
+              const msgData = row.message;
+              const msgType = (msgData.type || msgData.id?.[msgData.id?.length - 1] || '').toLowerCase();
+              
+              if (msgType.includes('tool') || msgType.includes('function') || msgType.includes('system')) return false;
+              if (msgType.includes('ai') && msgData.kwargs?.tool_calls?.length > 0 && !msgData.content) return false;
+
+              if (typeof msgData.content === 'string') {
+                  if (msgData.content.startsWith('Calling ')) return false;
+                  if (msgData.content.startsWith('[{')) return false; 
+              }
+              return true;
+            })
+            // 2. PROCESS VALID MESSAGES
+            .map((row: any) => {
+              const msgData = row.message;
+              const isUser = msgData.type === 'human' || msgData.role === 'user';
+              
+              let type: 'text' | 'document' | 'image' | 'mermaid' | 'markdown' = 'text';
+              let rawTextContent = msgData.content || msgData.data?.content || "";
+              let parsedContent: any = rawTextContent;
+
+              if (msgData.kwargs?.is_artifact) {
+                  type = 'document';
+                  parsedContent = { name: msgData.kwargs?.artifact_name || "Generated Document", raw: rawTextContent };
+              } else if (msgData.kwargs?.image_url) {
+                  type = 'image';
+                  parsedContent = { url: msgData.kwargs.image_url };
+              } else if (msgData.kwargs?.mermaid_code) {
+                  type = 'mermaid';
+                  parsedContent = { mermaid_code: msgData.kwargs.mermaid_code };
+              }
+              else if (!isUser && typeof rawTextContent === 'string') {
+                  const hasDocFlag = /\[FLAG:\s*DOCUMENT\]/i.test(rawTextContent);
+                  const hasImageFlag = /\[FLAG:\s*IMAGE\]/i.test(rawTextContent);
+                  const hasMermaid = /```mermaid/i.test(rawTextContent);
+
+                  if (hasDocFlag) {
+                      type = 'document';
+                      let cleanText = rawTextContent.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '').replace(/\[FLAG:\s*DOCUMENT\]/gi, '').trim();
+                      if (cleanText.startsWith("```")) {
+                          cleanText = cleanText.replace(/^```(markdown|md|txt)?\s*/i, '').replace(/```\s*$/i, '').trim();
+                      }
+                      parsedContent = { name: "BIWIZE_Requirement.docx", raw: cleanText };
+                  } else if (hasImageFlag || hasMermaid) {
+                      type = 'mermaid';
+                      let cleanText = rawTextContent.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '').replace(/\[FLAG:\s*IMAGE\]/gi, '').trim();
+                      let mCode = cleanText;
+                      const codeStartMatch = cleanText.match(/(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|pie|gantt|journey|gitGraph)[\s\S]*/);
+                      if (codeStartMatch) {
+                          mCode = codeStartMatch[0].replace(/```/g, '').trim();
+                      } else {
+                          mCode = cleanText.replace(/```(mermaid)?/gi, '').trim();
+                      }
+                      parsedContent = { mermaid_code: mCode };
+                  } else {
+                      type = 'text';
+                      let cleanText = rawTextContent.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '');
+                      cleanText = cleanText.replace(/\[FLAG:\s*(DOCUMENT|TEXT|IMAGE)\]/gi, '').trim();
+                      parsedContent = cleanText;
+                  }
+              }
+
+              return {
+                id: `db-${row.id}`, 
+                sender: isUser ? 'user' : 'assistant', 
+                type: type,
+                content: parsedContent,
+                timestamp: msgData.timestamp || new Date().toISOString(),
+                isPinned: msgData.kwargs?.isPinned || false,
+                attachment: msgData.kwargs?.attachment || undefined
+              };
+            });
             
-            return {
-              id: `db-${row.id}`, sender: isUser ? 'user' : 'assistant', type: type,
-              content: type === 'document' ? { name: msgData.kwargs?.artifact_name || "Generated Document", raw: msgData.content } 
-                : type === 'image' ? { url: msgData.kwargs.image_url } 
-                : type === 'mermaid' ? { mermaid_code: msgData.kwargs.mermaid_code }
-                : msgData.content,
-              timestamp: msgData.timestamp || new Date().toISOString(),
-              isPinned: msgData.kwargs?.isPinned || false,
-              attachment: msgData.kwargs?.attachment || undefined // Restore attachment from DB
-            };
-          });
           setMessages(historicalMessages);
         } else {
           setMessages([{ id: `init-${Date.now()}`, sender: 'assistant', type: 'text', content: "Business Analyst AI is Active. How shall we proceed?", timestamp: new Date().toISOString() }]);
@@ -106,7 +163,18 @@ export default function InteractiveChat() {
   };
 
   const togglePin = (messageId: string) => { setMessages(prev => prev.map(m => m.id === messageId ? { ...m, isPinned: !m.isPinned } : m)); };
-  const handleRegenerate = async (messageId: string) => { const aiMsgIndex = messages.findIndex(m => m.id === messageId); if (aiMsgIndex === -1) return; let lastUserMsgIndex = aiMsgIndex - 1; while (lastUserMsgIndex >= 0 && messages[lastUserMsgIndex].sender !== 'user') lastUserMsgIndex--; if (lastUserMsgIndex >= 0) { const lastUserMsg = messages[lastUserMsgIndex]; setMessages(messages.slice(0, aiMsgIndex)); await handleSendMessage(lastUserMsg.content, undefined, true); } };
+  
+  const handleRegenerate = async (messageId: string) => { 
+    const aiMsgIndex = messages.findIndex(m => m.id === messageId); 
+    if (aiMsgIndex === -1) return; 
+    let lastUserMsgIndex = aiMsgIndex - 1; 
+    while (lastUserMsgIndex >= 0 && messages[lastUserMsgIndex].sender !== 'user') lastUserMsgIndex--; 
+    if (lastUserMsgIndex >= 0) { 
+      const lastUserMsg = messages[lastUserMsgIndex]; 
+      setMessages(messages.slice(0, aiMsgIndex)); 
+      await handleSendMessage(lastUserMsg.content, undefined, true); 
+    } 
+  };
 
   const handleSaveArtifact = async () => {
     if (!activeArtifact) return;
@@ -121,19 +189,10 @@ export default function InteractiveChat() {
       }));
       setActiveArtifact(prev => prev ? { ...prev, content: prev.type === 'document' ? { ...prev.content, raw: artifactDraft } : artifactDraft } : null);
       
-      if (activeArtifact.id.startsWith('db-')) {
-        const dbId = activeArtifact.id.replace('db-', '');
-        const { data } = await supabase.from('chat_history').select('message').eq('id', dbId).single();
-        if (data) {
-          const updatedMessage = { ...data.message };
-          updatedMessage.content = artifactDraft;
-          await supabase.from('chat_history').update({ message: updatedMessage }).eq('id', dbId);
-        }
-      }
       setIsArtifactEditing(false);
       setShowSaveSuccess(true);
       setTimeout(() => setShowSaveSuccess(false), 3000);
-    } catch (err) { console.error("Failed to save artifact:", err); } 
+    } catch (err) { console.error("Failed to save document:", err); } 
     finally { setIsArtifactSaving(false); }
   };
 
@@ -144,13 +203,11 @@ export default function InteractiveChat() {
     }
   };
 
-  // --- SEND MESSAGE UPDATED TO CAPTURE ATTACHMENT ---
   const handleSendMessage = async (contentStr: string, toolType?: string, skipUserMessageUI = false) => {
-    const queryContent = contentStr || inputText || (selectedFile ? "Analyze attached artifact." : "");
+    const queryContent = contentStr || inputText || (selectedFile ? "Analyze attached file." : "");
     if (!queryContent && !selectedFile) return;
     if (isThinking) return;
 
-    // Capture file metadata for the UI
     const fileMeta = selectedFile ? { name: selectedFile.name, type: selectedFile.type } : undefined;
 
     const userMsg: Message = { 
@@ -159,26 +216,16 @@ export default function InteractiveChat() {
       type: 'text', 
       content: queryContent, 
       timestamp: new Date().toISOString(),
-      attachment: fileMeta // Attach to React State
+      attachment: fileMeta
     };
 
     if (!skipUserMessageUI) {
       setMessages(prev => [...prev, userMsg]);
-      await supabase.from('chat_history').insert([{ 
-        session_id: sessionId, 
-        message: { 
-          type: 'human', 
-          content: userMsg.content, 
-          timestamp: new Date().toISOString(),
-          kwargs: { attachment: fileMeta } // Save to Supabase DB so it persists
-        } 
-      }]);
     }
     
     setInputText(''); 
     setIsThinking(true);
     
-    // Process file for the webhook
     const fileToUpload = selectedFile;
     setSelectedFile(null); 
 
@@ -204,13 +251,14 @@ export default function InteractiveChat() {
       const data = await response.json();
       
       const aiResponse: Message = {
-        id: `msg-${Date.now()}`, sender: 'assistant', type: (data.type || 'text') as any, 
-        content: data.type === 'document' ? { name: data.content?.name || "Requirement_Spec.md", raw: data.content?.raw } : data.type === 'image' ? { url: data.content?.url, name: data.content?.name } : data.type === 'mermaid' ? { mermaid_code: data.content?.mermaid_code } : data.answer,
+        id: `msg-${Date.now()}`, 
+        sender: 'assistant', 
+        type: (data.type || 'text') as any, 
+        content: data.type === 'document' ? { name: data.content?.name || "Requirement_Spec.docx", raw: data.content?.raw } : data.type === 'image' ? { url: data.content?.url, name: data.content?.name } : data.type === 'mermaid' ? { mermaid_code: data.content?.mermaid_code } : data.answer,
         timestamp: new Date().toISOString(),
       };
       
       setMessages(prev => [...prev, aiResponse]);
-      await supabase.from('chat_history').insert([{ session_id: sessionId, message: { type: 'ai', content: data.type === 'document' ? data.content?.raw : (data.answer || ""), timestamp: new Date().toISOString(), kwargs: { image_url: data.type === 'image' ? data.content?.url : undefined, is_artifact: data.type === 'document', artifact_name: data.content?.name, mermaid_code: data.type === 'mermaid' ? data.content?.mermaid_code : undefined } } }]);
     
     } catch (error: any) { 
       if (error.name === 'AbortError') {
@@ -260,8 +308,10 @@ export default function InteractiveChat() {
                   <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50"><Loader2 className="animate-spin text-blue-500" size={24} /></div>
                 ) : messages.length <= 1 ? (
                   <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto space-y-8 text-center animate-in fade-in zoom-in duration-1000">
-                    <div className="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/20 mb-4 transform -rotate-6 border border-blue-400/30"><Sparkles className="text-white" size={40} /></div>
-                    <h2 className="text-4xl font-black tracking-tighter text-gray-100 italic uppercase">BIWIZE CO-PILOT</h2>
+                 <div className="text-white w-10 h-10 flex items-center justify-center">
+                        <BiwizeLogo />
+                    </div>
+                    <h2 className="text-4xl font-black tracking-tighter text-gray-100 italic uppercase">BIWIZE AI</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-10">
                       {quickPrompts.map((prompt, i) => (
                         <button key={i} onClick={() => handleSendMessage(prompt.title)} className="flex flex-col items-start p-5 bg-[#141414] border border-white/5 rounded-2xl transition-all text-left shadow-sm hover:border-blue-500/30 hover:shadow-2xl group">
