@@ -1,0 +1,102 @@
+.
+├── components.json
+├── .env.local
+├── eslint.config.mjs
+├── .github
+│   └── workflows
+│       ├── playwright.yml
+│       └── test.yml
+├── .gitignore
+├── next.config.ts
+├── next-env.d.ts
+├── package.json
+├── package-lock.json
+├── playwright.config.ts
+├── playwright-report
+│   └── index.html
+├── postcss.config.mjs
+├── project_structure.txt
+├── .pytest_cache
+│   ├── CACHEDIR.TAG
+│   ├── .gitignore
+│   ├── README.md
+│   └── v
+│       └── cache
+│           ├── lastfailed
+│           ├── nodeids
+│           └── stepwise
+├── README.md
+├── src
+│   ├── app
+│   │   ├── About
+│   │   │   └── page.tsx
+│   │   ├── auth
+│   │   │   ├── auth-fuse.tsx
+│   │   │   └── page.tsx
+│   │   ├── chat
+│   │   │   └── [id]
+│   │   │       ├── context
+│   │   │       │   └── AuthContext.tsx
+│   │   │       └── page.tsx
+│   │   ├── dashboard
+│   │   │   └── page.tsx
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── Pricing
+│   │   │   └── page.tsx
+│   │   ├── Services
+│   │   │   └── page.tsx
+│   │   ├── Settings
+│   │   │   └── page.tsx
+│   │   └── UploadDocument
+│   │       └── [id]
+│   │           └── page.tsx
+│   ├── components
+│   │   ├── chat
+│   │   │   ├── ChatHeader.tsx
+│   │   │   ├── ChatInput.tsx
+│   │   │   ├── ChatMessage.tsx
+│   │   │   ├── ChatSidebar.tsx
+│   │   │   ├── ChatWindow.tsx
+│   │   │   ├── FeedbackButtons.tsx
+│   │   │   ├── mermaid.tsx
+│   │   │   └── panel.tsx
+│   │   ├── dashboard
+│   │   │   ├── ActionMenu.tsx
+│   │   │   ├── ProjectGrid.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── StatsOverview.tsx
+│   │   │   └── TopHeader.tsx
+│   │   ├── General
+│   │   │   ├── footer.tsx
+│   │   │   ├── logo.tsx
+│   │   │   └── navbar.tsx
+│   │   ├── Landing
+│   │   │   ├── features.tsx
+│   │   │   ├── FQA.tsx
+│   │   │   ├── hero.tsx
+│   │   │   ├── problem.tsx
+│   │   │   ├── security.tsx
+│   │   │   ├── solution.tsx
+│   │   │   └── Source.tsx
+│   │   ├── pricing
+│   │   │   └── pricing.tsx
+│   │   └── Service
+│   └── lib
+│       ├── auth.tsx
+│       ├── chatHelpers.ts
+│       ├── chat.ts
+│       ├── clinet.ts
+│       ├── middleware.ts
+│       ├── server.ts
+│       ├── supabase.ts
+│       └── utils.ts
+├── start-biwize.sh
+├── .swc
+│   └── plugins
+│       └── linux_x86_64_24.0.0
+├── tailwind.config.ts
+└── tsconfig.json
+
+31 directories, 69 files
