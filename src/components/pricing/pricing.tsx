@@ -16,7 +16,6 @@ import {
   Zap
 } from 'lucide-react';
 
-// ─── Scene Overlay (Consistency with other components) ───────────────
 function SceneOverlay() {
   return (
     <>
@@ -31,7 +30,6 @@ function SceneOverlay() {
   );
 }
 
-// ─── Main Pricing Component ──────────────────────────────────────────
 export default function Pricing() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [view, setView] = useState<'pricing' | 'checkout' | 'contact' | 'success'>('pricing');
@@ -76,7 +74,6 @@ export default function Pricing() {
     if (plan.name === "Enterprise Grid") {
       setView('contact');
     } else if (plan.name === "Sandbox") {
-      // Simulate quick provisioning for free tier
       setIsProcessing(true);
       setTimeout(() => {
         setIsProcessing(false);
@@ -96,7 +93,6 @@ export default function Pricing() {
     }, 2000);
   };
 
-  // ─── Shared Container for Animation ───
   const ViewContainer = ({ children }: { children: React.ReactNode }) => (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -113,13 +109,11 @@ export default function Pricing() {
     <div className="relative bg-[#030305] text-white min-h-screen py-32 px-6 overflow-hidden flex flex-col justify-center font-sans">
       <SceneOverlay />
       
-      {/* Background Ambient Glows */}
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[150px] pointer-events-none z-0" />
       <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[150px] pointer-events-none z-0" />
 
       <AnimatePresence mode="wait">
         
-        {/* ─── 1. Pricing Grid View ─── */}
         {view === 'pricing' && (
           <motion.div 
             key="pricing"
@@ -144,7 +138,6 @@ export default function Pricing() {
               Choose the perfect environment for your requirement engineering. Switch to annual billing and save two months of runtime.
             </p>
             
-            {/* Billing Toggle */}
             <div className="flex justify-center mb-16 relative z-30">
               <div className="relative inline-flex items-center bg-white/[0.03] border border-white/10 rounded-full p-1.5 backdrop-blur-md">
                 <button
@@ -159,7 +152,6 @@ export default function Pricing() {
                 >
                   Yearly
                 </button>
-                {/* Animated Background Pill */}
                 <motion.div 
                   className="absolute top-1.5 bottom-1.5 w-[110px] bg-white rounded-full z-0 shadow-lg"
                   initial={false}
@@ -240,7 +232,6 @@ export default function Pricing() {
           </motion.div>
         )}
 
-        {/* ─── 2. Checkout View (Pro Plan) ─── */}
         {view === 'checkout' && (
           <ViewContainer key="checkout">
             <button 
@@ -302,7 +293,6 @@ export default function Pricing() {
           </ViewContainer>
         )}
 
-        {/* ─── 3. Contact View (Enterprise Plan) ─── */}
         {view === 'contact' && (
           <ViewContainer key="contact">
             <button 
@@ -355,7 +345,6 @@ export default function Pricing() {
           </ViewContainer>
         )}
 
-        {/* ─── 4. Success View ─── */}
         {view === 'success' && (
           <ViewContainer key="success">
             <div className="text-center py-4">

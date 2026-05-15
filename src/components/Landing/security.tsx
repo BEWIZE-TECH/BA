@@ -14,7 +14,6 @@ import {
   Activity 
 } from 'lucide-react';
 
-// ─── Scan Line Effect for Terminal ─────────────────────────────────────────
 function ScanLine() {
   return (
     <motion.div
@@ -44,7 +43,6 @@ export default function PrivacyManifesto() {
     }
   ];
 
-  // Added Variants type to strictly type the animation object
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -53,7 +51,6 @@ export default function PrivacyManifesto() {
     }
   };
 
-  // Replaced CSS string with Array format for easing
   const lineVariants: Variants = {
     hidden: { opacity: 0, x: -10, filter: 'blur(4px)' },
     visible: { 
@@ -66,8 +63,6 @@ export default function PrivacyManifesto() {
 
   return (
     <section id="security" className="py-32 bg-[#030305] relative overflow-hidden font-sans selection:bg-emerald-500/30">
-
-      {/* ─── Background FX & Grid ─── */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0" />
       <svg className="absolute inset-0 w-full h-full opacity-[0.02] pointer-events-none z-10" aria-hidden>
         <filter id="noise-privacy">
@@ -88,12 +83,11 @@ export default function PrivacyManifesto() {
       <div className="max-w-[1300px] mx-auto px-6 relative z-20">
         <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-16 lg:gap-24 items-center">
           
-          {/* ─── Left Column: Text & Features ─── */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} // Updated easing
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-6">
               <ShieldCheck className="w-3.5 h-3.5" />
@@ -131,22 +125,19 @@ export default function PrivacyManifesto() {
             </div>
           </motion.div>
 
-          {/* ─── Right Column: Terminal Window ─── */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }} // Updated easing
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             className="relative lg:ml-auto w-full max-w-[540px]"
           >
-            {/* Terminal Glow */}
             <div className="absolute inset-0 bg-emerald-500/20 blur-[120px] rounded-full opacity-50 pointer-events-none" />
             
             <div className="relative rounded-2xl bg-[#0A0A0C]/90 backdrop-blur-xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden ring-1 ring-white/5">
               
               <ScanLine />
 
-              {/* Window Controls Header */}
               <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/10 bg-[#121214]">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
@@ -160,7 +151,6 @@ export default function PrivacyManifesto() {
                 <div className="w-10" />
               </div>
 
-              {/* Terminal Output */}
               <motion.div 
                 variants={containerVariants}
                 initial="hidden"
@@ -221,7 +211,6 @@ export default function PrivacyManifesto() {
               </motion.div>
             </div>
 
-            {/* Floating Security Badge */}
             <motion.div 
               initial={{ opacity: 0, y: 20, x: 20 }}
               whileInView={{ opacity: 1, y: 0, x: 0 }}

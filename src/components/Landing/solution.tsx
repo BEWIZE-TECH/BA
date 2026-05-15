@@ -55,14 +55,10 @@ export function SolutionArchitecture() {
 
   return (
     <section className="py-32 bg-[#030305] relative overflow-hidden font-sans">
-      
-      {/* ─── Background FX ─── */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[500px] bg-blue-600/10 blur-[150px] rounded-full pointer-events-none z-0" />
 
       <div className="max-w-[1400px] mx-auto px-6 relative z-10">
-        
-        {/* ─── Header ─── */}
         <div className="flex flex-col items-center text-center mb-24">
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
@@ -95,14 +91,9 @@ export function SolutionArchitecture() {
           </motion.p>
         </div>
 
-        {/* ─── Pipeline Nodes ─── */}
         <div className="relative">
-          
-          {/* Connecting Data Line (Desktop) */}
           <div className="absolute top-[120px] left-[10%] right-[10%] h-[2px] hidden lg:block z-0">
-            {/* Dashed base line */}
             <div className="absolute inset-0 border-t-2 border-dashed border-white/10" />
-            {/* Animated glowing packet */}
             <motion.div
               className="absolute top-[-1px] left-0 w-32 h-[4px] bg-gradient-to-r from-transparent via-blue-500 to-transparent blur-[2px]"
               animate={{ x: ["-100%", "500%", "900%"] }}
@@ -125,15 +116,11 @@ export function SolutionArchitecture() {
                 transition={{ delay: idx * 0.15, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                 className="relative group"
               >
-                {/* Node Card */}
                 <div className="h-full bg-[#0a0a0c]/80 backdrop-blur-xl border border-white/[0.08] rounded-3xl p-6 transition-all duration-500 hover:bg-[#0f0f13] hover:border-white/[0.15] hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.2)] overflow-hidden flex flex-col">
-                  
-                  {/* Background Watermark ID */}
                   <div className="absolute -right-4 -top-8 text-[120px] font-black text-white/[0.02] pointer-events-none select-none group-hover:text-blue-500/[0.03] transition-colors duration-500">
                     {node.id}
                   </div>
 
-                  {/* Top Section: Icon & Status */}
                   <div className="flex justify-between items-start mb-8 relative z-10">
                     <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${node.color} p-[1px] shadow-lg`}>
                       <div className="w-full h-full bg-[#050505] rounded-[15px] flex items-center justify-center">
@@ -147,7 +134,6 @@ export function SolutionArchitecture() {
                     </div>
                   </div>
 
-                  {/* Title & Desc */}
                   <div className="relative z-10 flex-grow">
                     <h3 className="text-xl font-bold text-white mb-3 tracking-tight">
                       {node.title}
@@ -157,10 +143,8 @@ export function SolutionArchitecture() {
                     </p>
                   </div>
 
-                  {/* Divider */}
                   <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-5" />
 
-                  {/* Tech Stack Pills */}
                   <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-3">
                       <Cpu className="w-3.5 h-3.5 text-slate-500" />
@@ -180,7 +164,6 @@ export function SolutionArchitecture() {
 
                 </div>
 
-                {/* Mobile Connector (Hidden on Desktop) */}
                 {idx !== nodes.length - 1 && (
                   <div className="lg:hidden flex justify-center py-4">
                     <div className="w-px h-8 bg-gradient-to-b from-blue-500/50 to-transparent" />

@@ -84,12 +84,11 @@ export default function NewChatPage() {
     setStatus('uploading');
 
     try {
-      // 1. Create project in Supabase Database
       const { data: { user } } = await supabase.auth.getUser();
       
       const projectPayload = user 
         ? { name: projectName, user_id: user.id } 
-        : { name: projectName }; // Fallback if no auth is active, depends on your RLS policies
+        : { name: projectName }; 
 
       const { data: projectData, error: dbError } = await supabase
         .from('projects')
@@ -103,14 +102,13 @@ export default function NewChatPage() {
 
       const projectId = projectData.id;
 
-      // 2. Prepare and send files to n8n Webhook
       const formData = new FormData();
       files.forEach((fileData) => {
         formData.append('data', fileData.file); 
       });
 
       formData.append('projectName', projectName);
-      formData.append('projectId', projectId); // Send Supabase ID to n8n for vector linking
+      formData.append('projectId', projectId);
       formData.append('action', 'ingest_artifacts');
       formData.append('sessionId', 'Sentinel_WS_01');
       formData.append('timestamp', new Date().toISOString());
@@ -124,7 +122,6 @@ export default function NewChatPage() {
 
       setStatus('embedding');
       
-      // 3. Route to the chat interface using the DB generated project ID
       router.push(`/chat/${projectId}`);
 
     } catch (error) {

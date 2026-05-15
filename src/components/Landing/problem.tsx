@@ -3,12 +3,10 @@
 import React, { useEffect, useState, useRef, Suspense, lazy } from 'react';
 import { motion, useMotionValue, useTransform, animate, type Transition } from 'framer-motion';
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
 function cn(...classes: (string | undefined | false | null)[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-// ─── Animated Counter ─────────────────────────────────────────────────────────
 function AnimatedNumber({ value, prefix = '', suffix = '' }: { value: number; prefix?: string; suffix?: string }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
@@ -28,7 +26,6 @@ function AnimatedNumber({ value, prefix = '', suffix = '' }: { value: number; pr
   return <>{prefix}{display.toFixed(precision)}{suffix}</>;
 }
 
-// ─── Spline loader ────────────────────────────────────────────────────────────
 const Spline = lazy(() => import('@splinetool/react-spline'));
 
 function RobotScene({ scene }: { scene: string }) {
@@ -43,7 +40,6 @@ function RobotScene({ scene }: { scene: string }) {
   );
 }
 
-// ─── Noise texture overlay ────────────────────────────────────────────────────
 function NoiseOverlay() {
   return (
     <svg className="absolute inset-0 w-full h-full opacity-[0.025] pointer-events-none z-[1]" aria-hidden>
@@ -56,25 +52,20 @@ function NoiseOverlay() {
   );
 }
 
-// ─── Ambient grid lines ───────────────────────────────────────────────────────
 function GridLines() {
   return (
     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden>
-      {/* Vertical lines */}
       {[20, 40, 60, 80].map(p => (
         <div key={p} className="absolute top-0 bottom-0 w-px bg-white/[0.03]" style={{ left: `${p}%` }} />
       ))}
-      {/* Horizontal lines */}
       {[25, 50, 75].map(p => (
         <div key={p} className="absolute left-0 right-0 h-px bg-white/[0.03]" style={{ top: `${p}%` }} />
       ))}
-      {/* Radial vignette */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,transparent_40%,#050505_100%)]" />
     </div>
   );
 }
 
-// ─── Scan line effect ─────────────────────────────────────────────────────────
 function ScanLine() {
   return (
     <motion.div
@@ -85,7 +76,6 @@ function ScanLine() {
   );
 }
 
-// ─── Stat chip ─────────────────────────────────────────────────────────────────
 function StatChip({ value, suffix, prefix, label, color = 'white', delay = 0 }: {
   value: number; suffix?: string; prefix?: string; label: string;
   color?: 'white' | 'red' | 'blue'; delay?: number;
@@ -110,7 +100,6 @@ function StatChip({ value, suffix, prefix, label, color = 'white', delay = 0 }: 
   );
 }
 
-// ─── Coverage bar ─────────────────────────────────────────────────────────────
 function CoverageBar({ pct, color, delay = 0 }: { pct: number; color: 'muted' | 'blue'; delay?: number }) {
   if (color === 'muted') {
     return (
@@ -121,7 +110,6 @@ function CoverageBar({ pct, color, delay = 0 }: { pct: number; color: 'muted' | 
           transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] as any, delay }}
           className="h-full bg-slate-600 rounded-l-full"
         />
-        {/* missing zone */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -152,7 +140,6 @@ function CoverageBar({ pct, color, delay = 0 }: { pct: number; color: 'muted' | 
   );
 }
 
-// ─── Audit card ───────────────────────────────────────────────────────────────
 function AuditCard() {
   const spring: Transition = { type: 'spring', stiffness: 80, damping: 18 };
   return (
@@ -162,13 +149,11 @@ function AuditCard() {
       transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] as any }}
       className="relative w-full max-w-[430px] shrink-0"
     >
-      {/* Glow halo */}
       <div className="absolute -inset-4 bg-blue-500/5 rounded-[2.5rem] blur-2xl pointer-events-none" />
 
       <div className="relative bg-[#0C0C0E]/80 backdrop-blur-2xl border border-white/[0.07] rounded-[1.75rem] overflow-hidden shadow-2xl">
         <ScanLine />
 
-        {/* Header */}
         <div className="px-6 pt-6 pb-5 border-b border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
@@ -181,7 +166,6 @@ function AuditCard() {
         </div>
 
         <div className="px-6 py-5 space-y-6">
-          {/* Legacy row */}
           <div className="space-y-2.5">
             <div className="flex justify-between items-center">
               <span className="text-[12px] text-slate-400 font-medium">Legacy Manual Discovery</span>
@@ -193,10 +177,8 @@ function AuditCard() {
             </p>
           </div>
 
-          {/* Divider */}
           <div className="h-px bg-white/[0.04]" />
 
-          {/* Biwize row */}
           <div className="space-y-2.5">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -226,7 +208,6 @@ function AuditCard() {
             </motion.div>
           </div>
 
-          {/* Footer insight */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -251,7 +232,6 @@ function AuditCard() {
   );
 }
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
 const ROBOT_SCENE = 'https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode';
 
 const stagger = {
@@ -267,37 +247,29 @@ export default function BiwizeHero() {
   return (
     <main className="min-h-screen bg-[#050505] font-sans antialiased">
       <div className="relative w-full min-h-screen overflow-hidden flex items-center">
-        {/* Background layers */}
-      
         <NoiseOverlay />
 
-        {/* Ambient color blobs */}
         <div className="absolute top-1/3 left-1/4 w-[600px] h-[400px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none z-0" />
         <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-indigo-600/5 rounded-full blur-[100px] pointer-events-none z-0" />
 
-        {/* Spline robot — fills the right half */}
         <div className="absolute inset-0 z-0" aria-hidden>
           <RobotScene scene={ROBOT_SCENE} />
         </div>
 
-        {/* Content */}
         <div className="relative z-10 w-full px-6 sm:px-10 md:px-16 lg:px-24 xl:px-32 py-24 pointer-events-none">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-16 w-full">
 
-            {/* ── Left column ── */}
             <motion.div
               initial="hidden"
               animate="visible"
               variants={stagger}
               className="flex flex-col text-left text-white pointer-events-auto w-full max-w-[580px]"
             >
-              {/* Eyebrow */}
               <motion.div variants={fadeUp} className="flex items-center gap-3 mb-7">
                 <div className="h-px w-8 bg-blue-500/60" />
                 <span className="text-[10px] uppercase tracking-[0.22em] text-blue-400/80 font-semibold">2026 Industry Report</span>
               </motion.div>
 
-              {/* Headline */}
               <motion.h1
                 variants={fadeUp}
                 className="text-[42px] sm:text-[52px] lg:text-[58px] font-medium leading-[1.05] tracking-tight mb-7"
@@ -310,14 +282,12 @@ export default function BiwizeHero() {
                 <span className="text-white">ambiguity.</span>
               </motion.h1>
 
-              {/* Body */}
               <motion.p variants={fadeUp} className="text-[16px] text-slate-400 mb-10 leading-[1.75] max-w-[480px]">
                 Traditional scoping relies on human memory and static docs. But{' '}
                 <strong className="text-white font-medium">42.9% of project failures</strong> stem from requirements
                 that were never explicitly stated—hiding in plain sight within stakeholder interviews and Slack threads.
               </motion.p>
 
-              {/* Stats */}
               <motion.div
                 variants={fadeUp}
                 className="grid grid-cols-2 gap-8 mb-10 py-8 border-y border-white/[0.07]"
@@ -326,7 +296,6 @@ export default function BiwizeHero() {
                 <StatChip value={2.4} prefix="+$" suffix="M" label="Avg. Annual Scope Creep" color="red" delay={0.65} />
               </motion.div>
 
-              {/* CTA */}
               <motion.div variants={fadeUp} className="flex items-center gap-6">
                 <button className="group flex items-center gap-2.5 text-[13px] font-semibold text-white bg-white/[0.06] border border-white/10 px-5 py-2.5 rounded-xl hover:bg-white/10 hover:border-white/20 transition-all duration-200">
                   Read the Report
@@ -340,12 +309,10 @@ export default function BiwizeHero() {
               </motion.div>
             </motion.div>
 
-            {/* ── Right column: audit card ── */}
             <AuditCard />
           </div>
         </div>
 
-        {/* Bottom gradient fade */}
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#050505] to-transparent pointer-events-none z-10" />
       </div>
     </main>

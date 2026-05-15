@@ -5,7 +5,7 @@ import { Menu, X, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ─── Reused Biwize Logo ──────────────────────────────────────────────────────
+
 function BiwizeLogo() {
   return (
     <div className="relative h-10 w-10 flex items-center justify-center group/logo">
@@ -24,13 +24,12 @@ function BiwizeLogo() {
   );
 }
 
-// ─── Main Navbar Component ───────────────────────────────────────────────────
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // Handle Scroll State
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -41,13 +40,12 @@ export default function Navbar() {
     { name: 'Home', href: '/' },
     { name: 'About', href: '/About' },
     { name: 'Pricing', href: '/Pricing' },
-    { name: 'Services', href: '/Services' }
   ];
 
   return (
     <nav className="fixed top-0 w-full z-50 flex justify-center pt-4 sm:pt-6 px-4 pointer-events-none">
      
-      {/* ─── Floating Island Container ─── */}
+
       <motion.div 
         layout
         className={`
@@ -59,7 +57,6 @@ export default function Navbar() {
         `}
       >
         
-        {/* ─── Brand / Logo ─── */}
         <Link href="/" className="flex items-center gap-3 group/brand min-w-fit z-20">
           <BiwizeLogo />
           <div className="flex flex-col">
@@ -75,7 +72,7 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* ─── Desktop Links (with Framer Motion Pill Hover) ─── */}
+
         <ul className="hidden lg:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
           {navLinks.map((link, index) => (
             <li 
@@ -106,7 +103,7 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {/* ─── Right Section (CTA & Mobile Toggle) ─── */}
+
         <div className="flex items-center gap-4 min-w-fit z-20">
           <Link href="/auth" className="hidden sm:block">
             <button className="group relative px-7 py-2.5 bg-white text-slate-950 text-[11px] font-black uppercase tracking-[0.15em] rounded-full transition-all hover:scale-105 active:scale-95 flex items-center gap-2 overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.25)]">
@@ -118,7 +115,7 @@ export default function Navbar() {
             </button>
           </Link>
 
-          {/* Mobile Hamburger */}
+
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="lg:hidden p-2 text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-full border border-white/10 transition-colors"
@@ -127,7 +124,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* ─── Mobile Dropdown Menu (Animated) ─── */}
+
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div 
@@ -186,7 +183,6 @@ export default function Navbar() {
 
       </motion.div>
 
-      {/* Shimmer Animation Keyframes */}
       <style dangerouslySetInnerHTML={{
         __html: `
           @keyframes shimmer {

@@ -230,7 +230,7 @@ export default function FeaturesGridBento() {
     <section className="py-32 bg-[#030305] relative overflow-hidden font-sans selection:bg-blue-500/30">
       <style dangerouslySetInnerHTML={{ __html: inlineStyles }} />
       
-      {/* Background Grid & Noise */}
+
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0" />
       <svg className="absolute inset-0 w-full h-full opacity-[0.02] pointer-events-none z-10" aria-hidden>
         <filter id="noise-bento">
@@ -239,7 +239,7 @@ export default function FeaturesGridBento() {
         <rect width="100%" height="100%" filter="url(#noise-bento)" />
       </svg>
 
-      {/* Ambient Orbs */}
+
       <motion.div 
         animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
@@ -344,12 +344,12 @@ export default function FeaturesGridBento() {
               {/* Fade out top of chat */}
               <div className="absolute top-[-40px] left-0 w-full h-24 bg-gradient-to-b from-[#0A0A0C] to-transparent z-20 pointer-events-none" />
               
-              {/* User Prompt */}
+
               <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} whileInView={{ opacity: 1, scale: 1, y: 0 }} viewport={{ once: true }} className="bg-white/[0.05] border border-white/10 rounded-2xl rounded-tr-sm p-4 text-[13px] text-white/90 self-end max-w-[85%] backdrop-blur-md shadow-lg font-medium">
                 Analyze Q3 stakeholder interviews for resistance risks.
               </motion.div>
               
-              {/* AI Response */}
+
               <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} whileInView={{ opacity: 1, scale: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="flex items-start gap-4 self-start w-full">
                 <div className="w-8 h-8 rounded-full flex-shrink-0 mt-1 shadow-[0_0_20px_rgba(168,85,247,0.4)] flex items-center justify-center relative overflow-hidden bg-black border border-purple-500/30">
                   <div className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_70%,#a855f7)] animate-spin" style={{ animationDuration: '3s' }} />
@@ -380,7 +380,7 @@ export default function FeaturesGridBento() {
             </div>
           </MagicCard>
 
-          {/* ─── Card 3: Sovereign & Air-Gapped ─── */}
+
           <MagicCard 
             glowColor="16, 185, 129" 
             className="lg:col-span-7 p-8 md:p-10 flex flex-col-reverse md:flex-row gap-10 items-center shadow-2xl group"

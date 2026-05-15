@@ -28,7 +28,6 @@ export function ChatHeader({ projectName }: ChatHeaderProps) {
   return (
     <header className="h-14 flex items-center justify-between px-4 md:px-6 bg-[#050505] border-b border-gray-800 transition-colors z-20 shrink-0 shadow-sm">
       
-      {/* LEFT PORTION: Brand & Navigation */}
       <div className="flex items-center gap-6 w-1/3">
         <Link href="/" className="flex items-center gap-3 group/brand min-w-fit">
           <BiwizeLogo />
@@ -50,7 +49,6 @@ export function ChatHeader({ projectName }: ChatHeaderProps) {
         </div>
       </div>
 
-      {/* CENTER PORTION: Active Project Context */}
       <div className="flex items-center justify-center w-1/3">
          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#111] border border-gray-800 rounded-md shadow-inner">
             <Database size={12} className="text-blue-500" />
@@ -60,7 +58,6 @@ export function ChatHeader({ projectName }: ChatHeaderProps) {
          </div>
       </div>
       
-      {/* RIGHT PORTION: System Controls */}
       <div className="flex items-center justify-end gap-2.5 w-1/3">
         <button 
           className="w-8 h-8 rounded-md bg-blue-600/10 border border-blue-500/30 flex items-center justify-center text-blue-400 hover:bg-blue-600/20 transition-all"

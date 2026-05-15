@@ -36,7 +36,6 @@ export default function FAQSection() {
   return (
     <section className="py-32 bg-[#030305] relative overflow-hidden font-sans">
       
-      {/* ─── Background FX & Grid ─── */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0" />
       <svg className="absolute inset-0 w-full h-full opacity-[0.02] pointer-events-none z-10" aria-hidden>
         <filter id="noise-faq">
@@ -59,7 +58,6 @@ export default function FAQSection() {
       <div className="max-w-7xl mx-auto px-6 relative z-20">
         <div className="grid lg:grid-cols-[1fr_2fr] gap-16 lg:gap-24">
           
-          {/* ─── Left Column: Headers & Specs ─── */}
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -83,11 +81,10 @@ export default function FAQSection() {
               </p>
             </div>
 
-            {/* System Requirements Card */}
+
             <div className="p-1 rounded-3xl bg-gradient-to-b from-white/[0.08] to-transparent shadow-2xl">
               <div className="bg-[#0a0a0c]/90 backdrop-blur-xl rounded-[23px] p-8 border border-white/[0.05] relative overflow-hidden">
-                
-                {/* Card Header */}
+
                 <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/[0.05]">
                   <h3 className="text-sm font-bold text-white uppercase tracking-widest">Sys. Requirements</h3>
                   <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20">
@@ -96,7 +93,6 @@ export default function FAQSection() {
                   </div>
                 </div>
 
-                {/* Specs List */}
                 <div className="space-y-8">
                   <div className="flex items-start gap-5 group">
                     <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
@@ -133,7 +129,6 @@ export default function FAQSection() {
             </div>
           </motion.div>
 
-          {/* ─── Right Column: Accordion ─── */}
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}

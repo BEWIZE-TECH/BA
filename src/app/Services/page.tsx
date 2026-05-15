@@ -240,7 +240,6 @@ export default function ServicesPage() {
                       ))}
                     </div>
 
-                    {/* Central Icon */}
                     <div className="relative z-10 flex flex-col items-center">
                        <div className={`w-32 h-32 rounded-full border border-white/10 bg-black/50 backdrop-blur-xl flex items-center justify-center mb-6 shadow-2xl relative overflow-hidden group-hover:scale-105 transition-transform duration-500`}>
                           <div className={`absolute inset-0 border border-t-transparent rounded-full animate-[spin_4s_linear_infinite] ${activeData.theme.text}`} />
@@ -249,7 +248,7 @@ export default function ServicesPage() {
                           {activeTab === 'business' && <Globe className={`w-12 h-12 ${activeData.theme.text} drop-shadow-[0_0_15px_currentColor]`} />}
                        </div>
                        
-                       {/* Terminal Output snippet */}
+
                        <div className="bg-black/60 border border-white/5 rounded-lg px-4 py-2 text-[10px] font-mono text-slate-400 flex items-center gap-2 backdrop-blur-md">
                          <Activity className={`w-3 h-3 ${activeData.theme.text} animate-pulse`} />
                          <span>node_{activeTab}_active.sh</span>
@@ -263,7 +262,6 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* ─── Trust & Comparison Section ─── */}
       <section className="py-24 px-6 border-t border-white/[0.05] bg-gradient-to-b from-[#030305] to-[#0A0A0C] relative z-20">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 divide-y md:divide-y-0 md:divide-x divide-white/10 text-center">
           <div className="pt-8 md:pt-0">

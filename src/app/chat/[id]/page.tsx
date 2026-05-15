@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { UploadCloud, Loader2, FileText, Sparkles, Layout } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-// Modular Components
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { ChatMessage, Message } from '@/components/chat/ChatMessage';
@@ -28,7 +27,6 @@ export default function InteractiveChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [projectName, setProjectName] = useState<string>("Initializing...");
   
-  // Artifact Panel State
   const [activeArtifact, setActiveArtifact] = useState<{id: string, content: any, type: string} | null>(null);
   const [isArtifactEditing, setIsArtifactEditing] = useState(false);
   const [artifactDraft, setArtifactDraft] = useState('');
@@ -49,7 +47,6 @@ export default function InteractiveChat() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isArtifactEditing, artifactDraft]);
 
-  // --- FETCH HISTORY WITH LANGCHAIN AGENT FILTER ---
   useEffect(() => {
     const fetchHistory = async () => {
       if (!sessionId) return;
@@ -63,7 +60,6 @@ export default function InteractiveChat() {
 
         if (data && data.length > 0) {
           const historicalMessages: Message[] = data
-            // 1. FILTER OUT N8N/LANGCHAIN INTERNAL TOOL STEPS
             .filter((row: any) => {
               const msgData = row.message;
               const msgType = (msgData.type || msgData.id?.[msgData.id?.length - 1] || '').toLowerCase();
@@ -77,7 +73,6 @@ export default function InteractiveChat() {
               }
               return true;
             })
-            // 2. PROCESS VALID MESSAGES
             .map((row: any) => {
               const msgData = row.message;
               const isUser = msgData.type === 'human' || msgData.role === 'user';
@@ -294,13 +289,10 @@ export default function InteractiveChat() {
             )}
           </AnimatePresence>
 
-          {/* SIDEBAR */}
           {isSidebarOpen && <ChatSidebar />}
           
-          {/* Main Content Workspace */}
           <main className="relative flex flex-1 h-full transition-all duration-700 ease-in-out">
             
-            {/* FULL WIDTH CHAT PANEL */}
             <div className="flex flex-col h-full w-full rounded-2xl bg-[#0f0f0f] shadow-2xl relative border border-white/5 overflow-hidden">
               
               <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth custom-scrollbar">
@@ -357,7 +349,6 @@ export default function InteractiveChat() {
               </div>
             </div>
 
-            {/* FULLSCREEN OVERLAY COMPONENT */}
             <ArtifactPanel 
               activeArtifact={activeArtifact}
               onClose={() => setActiveArtifact(null)}

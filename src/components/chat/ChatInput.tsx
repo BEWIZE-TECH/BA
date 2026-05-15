@@ -42,7 +42,7 @@ export function ChatInput({ onSendMessage, onStop, isSending, selectedFile, onFi
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => { 
     const file = event.target.files?.[0]; 
     if (file) {
-      onFileSelect(file); // Passes the RAW File object up to page.tsx
+      onFileSelect(file); 
     }
     event.target.value = "";
   };
@@ -63,7 +63,7 @@ export function ChatInput({ onSendMessage, onStop, isSending, selectedFile, onFi
 
     onSendMessage(finalMessage);
     setValue("");
-    // Do NOT call onFileSelect(null) here. Let page.tsx handle clearing it!
+ 
     
     if (internalTextareaRef.current) internalTextareaRef.current.style.height = "auto";
   };

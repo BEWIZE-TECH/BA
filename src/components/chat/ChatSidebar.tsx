@@ -44,7 +44,6 @@ export function ChatSidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
-  // Custom Delete Modal State
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 

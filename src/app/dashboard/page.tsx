@@ -14,7 +14,6 @@ export default function Dashboard() {
   const [totalNodes, setTotalNodes] = useState<number>(0);
   const [isDarkMode, setIsDarkMode] = useState(true);
   
-  // --- NEW: Master Search State ---
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -49,7 +48,6 @@ export default function Dashboard() {
           <TopHeader 
             isDarkMode={isDarkMode} 
             toggleTheme={() => setIsDarkMode(!isDarkMode)} 
-            // --- NEW: Pass state to TopHeader ---
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
           />
@@ -87,7 +85,6 @@ export default function Dashboard() {
                 </h2>
               </div>
 
-              {/* --- NEW: Pass searchQuery to ProjectGrid --- */}
               <ProjectGrid searchQuery={searchQuery} />
             </main>
 

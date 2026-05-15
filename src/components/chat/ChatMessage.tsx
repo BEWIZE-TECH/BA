@@ -12,7 +12,7 @@ import { marked } from 'marked';
 
 mermaid.initialize({ 
   startOnLoad: false, 
-  theme: 'default', // Changed to default for high-contrast white background rendering
+  theme: 'default', 
   securityLevel: 'loose', 
   fontFamily: 'monospace',
 });
@@ -73,7 +73,6 @@ const AdvancedFeedback = ({ messageId, onFeedback }: { messageId: string, onFeed
   );
 };
 
-// --- LOCAL DOM MERMAID RENDERER WITH VISIBILITY & AUTO-HEAL ---
 const MermaidRenderer = ({ chart, onOpenArtifact }: { chart: string, onOpenArtifact?: (content: string, type: string) => void }) => {
   const [svgCode, setSvgCode] = useState<string>(''); 
   const [errorMsg, setErrorMsg] = useState<string>('');
@@ -87,7 +86,6 @@ const MermaidRenderer = ({ chart, onOpenArtifact }: { chart: string, onOpenArtif
           const match = cleanChart.match(/(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|pie|gantt|journey|gitGraph)[\s\S]*/);
           if (match) { cleanChart = match[0].trim(); }
 
-          // 1. LLM Sanitization
           cleanChart = cleanChart
             .replace(/\*\*(.*?)\*\*/g, '$1')
             .replace(/\*(.*?)\*/g, '$1')
@@ -103,7 +101,6 @@ const MermaidRenderer = ({ chart, onOpenArtifact }: { chart: string, onOpenArtif
             .replace(/(?<=\d)\s*>/g, ' greater than ')
             .replace(/([^\n\s])\s*([A-Za-z0-9_]+(?:->>|->|-->>|-->)[A-Za-z0-9_]+:)/g, '$1\n$2');
 
-          // 2. Auto-Heal Truncation
           let lines = cleanChart.split('\n');
           while (lines.length > 0 && !lines[lines.length - 1].trim()) { lines.pop(); }
           let lastLine = lines[lines.length - 1] || '';
@@ -115,7 +112,6 @@ const MermaidRenderer = ({ chart, onOpenArtifact }: { chart: string, onOpenArtif
           const missingEnds = openBlocks - endBlocks;
           if (missingEnds > 0) { for (let i = 0; i < missingEnds; i++) { cleanChart += '\nend'; } }
 
-          // 3. Render
           const id = `mermaid-${Math.random().toString(36).substring(2, 10)}`;
           const originalConsoleError = console.error;
           console.error = (...args) => { if (args[0]?.toString().includes('Parse error')) return; originalConsoleError(...args); };

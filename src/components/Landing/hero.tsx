@@ -7,28 +7,21 @@ import { motion, useScroll, useTransform, Variants } from 'framer-motion';
 
 const Spline = lazy(() => import('@splinetool/react-spline'));
 
-// ─── Interfaces ─────────────────────────────────────────────────────────────
 interface HeroSectionProps {
   title?: string;
   description?: string;
 }
 
-// ─── Premium Noise, Grid & Vignette Overlays ────────────────────────────────
 function SceneOverlay() {
   return (
     <>
-      {/* 1. Technical Background Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] z-10 pointer-events-none" />
-      
-      {/* 2. Heavy vignette to ensure text readability against the 3D scene */}
       <div className="absolute inset-0 pointer-events-none z-10" style={{
         background: `
           radial-gradient(circle at 50% 50%, transparent 0%, rgba(3,3,5,0.7) 60%, #030305 100%),
           linear-gradient(to bottom, #030305 0%, transparent 10%, transparent 80%, #030305 100%)
         `
       }} />
-      
-      {/* 3. Subtle grain/noise texture for a premium cinematic feel */}
       <svg className="absolute inset-0 w-full h-full opacity-[0.03] pointer-events-none z-20" aria-hidden>
         <filter id="noise">
           <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
@@ -48,7 +41,7 @@ function HeroSplineBackground() {
         </div>
       }>
         <Spline
-          className="w-full h-full scale-110 opacity-80" // Scaled up and slightly dimmed
+          className="w-full h-full scale-110 opacity-80"
           scene="https://prod.spline.design/us3ALejTXl6usHZ7/scene.splinecode"
         />
       </Suspense>
@@ -82,11 +75,8 @@ function HeroContent({ title, description }: HeroSectionProps) {
       animate="show"
       className="text-center text-white px-4 max-w-5xl mx-auto relative z-30 flex flex-col items-center"
     >
-      {/* Ambient Central Glow behind text */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-blue-600/15 rounded-full blur-[120px] pointer-events-none -z-10" />
 
-
-      {/* Main Headline */}
       <motion.h1 
         variants={itemVariants}
         className="text-5xl sm:text-6xl md:text-8xl lg:text-[6.5rem] font-extrabold pb-4 bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/40 tracking-tighter leading-[1.05] drop-shadow-sm"
@@ -94,7 +84,6 @@ function HeroContent({ title, description }: HeroSectionProps) {
         {title || `BIWIZE Intelligence.`}
       </motion.h1>
       
-      {/* Subtitle */}
       <motion.p 
         variants={itemVariants}
         className="text-lg md:text-xl lg:text-2xl font-light text-slate-400 max-w-3xl mx-auto px-6 mb-12 leading-relaxed"
@@ -106,7 +95,6 @@ function HeroContent({ title, description }: HeroSectionProps) {
         )}
       </motion.p>
       
-
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-6">
         
         <Link href="/auth">
