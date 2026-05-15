@@ -1,6 +1,4 @@
-Here is your polished, professional **User Guide**, followed by a comprehensive **README.md** file tailored for your GitHub repository.
 
----
 
 # BIWIZE User Guide
 
